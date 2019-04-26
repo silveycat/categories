@@ -5,8 +5,8 @@ This repository contains three files:
 3) `R_code.r` - R code that reads in these text files and outputs the confidence intervals, graphs, and statistical 
 analyses reported in the paper
 
-The repository also includes pre-generated text files that can be directly analysed using the R code, in the output 
-folder.
+The repository also includes, in the output folder, pre-generated text files that can be directly analysed using the 
+R code.
 
 ## Running the scripts
 Please note that since part of the analysis involves a genetic algorithm, regenerating the text files from the Python 
@@ -21,7 +21,7 @@ python analysis_scripts.py
 
 Once the output files have been produced, the R script can be run in R or RStudio to produce the graphs and analyses.
 
-The repository also includes the image stimuli used in the experiments in the stimuli folder.
+The repository also includes the image stimuli used in the experiments (in the stimuli folder).
 
 ## Citation
 > Silvey, C., Kirby, S., & Smith, K. Communication increases category structure and alignment only when combined with

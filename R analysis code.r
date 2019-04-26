@@ -81,11 +81,10 @@ cdf = 9
 
 # read in data
 
-# set working directory to location of text files
+# if not running RStudio, manually set working directory to location of script (folder containing output folder)
 WORKING_DIR <- ""
 if (rstudioapi::isAvailable()) {
-  output_dir <- paste(dirname(rstudioapi::getActiveDocumentContext()$path), "output", "/")
-  setwd(output_dir)
+  setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 } else {
     if (WORKING_DIR == "") {
         stop("Please either use RStudio to run this script, or manually specify the working\
@@ -95,7 +94,7 @@ if (rstudioapi::isAvailable()) {
     }
 }
 
-exp1spec <- read.delim("experiment_1_specificity.txt", header = TRUE, sep = "\t")
+exp1spec <- read.delim("output/experiment_1_specificity.txt", header = TRUE, sep = "\t")
 
 indiv <- subset(exp1spec, Condition == "i")
 comm <- subset(exp1spec, Condition == "c")
@@ -151,13 +150,19 @@ print(exp1_spec_c_sd_ci)
 
 # Graph
 
-exp1_spec_graph <- ggplot(exp1_spec_descriptives, aes(x=factor(group1), y=mean))
+# parameters to be used in this and all subsequent plots
 xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
 yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
 axistext <- element_text(size=12)
-exp1_spec_graph + theme_bw() + geom_bar(stat="identity", aes(fill=group1)) + scale_fill_grey() + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25)) + scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + scale_y_continuous('Specificity\n') + theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None")
-ggsave(filename="Exp1Specificity.pdf",width=7.25,height=5.5)
 
+exp1_spec_graph <- ggplot(exp1spec, aes(x = Condition, y = Specificity))
+exp1_spec_graph + theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center", binpositions = "all", fill = "grey80", color = "grey80") +
+  scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + 
+  scale_y_continuous('Specificity\n', limits = c(0, 17)) + 
+  theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None") +
+  geom_point(data = exp1_spec_descriptives, aes(x = group1, y = mean), size = 2) +
+  geom_errorbar(data = exp1_spec_descriptives, aes(x = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1)
+ggsave(filename="Exp1Specificity.pdf",width=7.25,height=5.5)
 
 # Statistical analysis
 
@@ -169,7 +174,7 @@ print(exp1_spec_stat)
 
 # read in data
 
-exp1conv <- read.delim("experiment_1_convexity.txt", header = TRUE, sep = "\t")
+exp1conv <- read.delim("output/experiment_1_convexity.txt", header = TRUE, sep = "\t")
 
 indiv <- subset(exp1conv, Condition == "i")[c(1, 5)]
 comm <- subset(exp1conv, Condition == "c")[c(1, 5)]
@@ -225,11 +230,13 @@ print(exp1_conv_c_sd_ci)
 
 # Graph
 
-exp1_conv_graph <- ggplot(exp1_conv_descriptives, aes(x=factor(group1), y=mean))
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-exp1_conv_graph + theme_bw() + geom_bar(stat="identity", aes(fill=group1)) + scale_fill_grey() + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25)) + scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + scale_y_continuous('Convexity\n',limits=c(0,1)) + theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None")
+exp1_conv_graph <- ggplot(exp1conv, aes(x = Condition, y = Corrected))
+exp1_conv_graph + theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center", binpositions = "all", fill = "grey80", color = "grey80") +
+  scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + 
+  scale_y_continuous('Convexity\n', limits = c(0, 1)) + 
+  theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None") +
+  geom_point(data = exp1_conv_descriptives, aes(x = group1, y = mean), size = 2) +
+  geom_errorbar(data = exp1_conv_descriptives, aes(x = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1)
 ggsave(filename="Exp1Convexity.pdf",width=7.25,height=5.5)
 
 
@@ -247,7 +254,7 @@ cdf = 9
 
 # read in data
 
-exp1align <- read.delim("experiment_1_alignment.txt", header = TRUE, sep = "\t")
+exp1align <- read.delim("output/experiment_1_alignment.txt", header = TRUE, sep = "\t")
 
 # reorder factor levels
 
@@ -292,11 +299,13 @@ print(exp1_align_c_sd_ci)
 
 # Graph - alignment
 
-exp1_align_graph <- ggplot(exp1_align_descriptives, aes(x=factor(group1), y=mean))
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-exp1_align_graph + theme_bw() + geom_bar(stat="identity", aes(fill=group1)) + scale_fill_grey() + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25)) + scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + scale_y_continuous('Alignment (Adjusted Rand index)\n',limits=c(0,1)) + theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None")
+exp1_align_graph <- ggplot(exp1align, aes(x = Condition, y = AdjustedRandIndex))
+exp1_align_graph + theme_bw() + geom_dotplot(binaxis = "y", stackdir = "center", binpositions = "all", fill = "grey80", color = "grey80") +
+  scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + 
+  scale_y_continuous('Alignment (Adjusted Rand index)\n', limits = c(-0.05, 1)) + 
+  theme(axis.text=axistext,axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position="None") +
+  geom_point(data = exp1_align_descriptives, aes(x = group1, y = mean), size = 2) +
+  geom_errorbar(data = exp1_align_descriptives, aes(x = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1)
 ggsave(filename="Exp1Alignment.pdf",width=7.25,height=5.5)
 
 # Statistical analysis
@@ -311,7 +320,7 @@ print(exp1_align_stat)
 
 # read in data
 
-exp1converge <- read.delim("experiment_1_convergence.txt", header = TRUE, sep = "\t")
+exp1converge <- read.delim("output/experiment_1_convergence.txt", header = TRUE, sep = "\t")
 
 print(exp1converge)
 
@@ -319,11 +328,8 @@ print(exp1converge)
 
 exp1converge$Condition = factor(exp1converge$Condition,levels(exp1converge$Condition)[c(2,1)])
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
 exp1_converge_graph <- ggplot(exp1converge, aes(x=Condition, y=Convergence))
-exp1_converge_graph + theme_bw() + geom_bar(stat="identity",aes(fill=Condition)) + scale_fill_grey() + geom_errorbar(aes(ymin=LowLim, ymax=UpLim), width=.25) + scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + scale_y_continuous('',limits=c(0,1.0)) + theme(axis.text = axistext, axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position = "none")
+exp1_converge_graph + theme_bw() + geom_point(size = 2) + geom_errorbar(aes(ymin=LowLim, ymax=UpLim), width=.25, size = 1) + scale_x_discrete("\nCondition", labels=c("Individual","Communication")) + scale_y_continuous('',limits=c(0,1.0)) + theme(axis.text = axistext, axis.title.x=xaxistitle, axis.title.y=yaxistitle, legend.position = "none")
 ggsave(filename="Exp1Convergence.pdf",width=7.25,height=5.5)
 
 
@@ -331,7 +337,7 @@ ggsave(filename="Exp1Convergence.pdf",width=7.25,height=5.5)
 
 # read in data
 
-exp1success_by_round <- read.delim("experiment_1_success_by_round.txt", header = TRUE, sep = "\t")
+exp1success_by_round <- read.delim("output/experiment_1_success_by_round.txt", header = TRUE, sep = "\t")
 
 # confidence intervals
 
@@ -357,7 +363,7 @@ print(exp1_success_by_round_between_ci)
 
 # read in data
 
-exp1success <- read.delim("experiment_1_success_last_2.txt", header = TRUE, sep = "\t")
+exp1success <- read.delim("output/experiment_1_success_last_2.txt", header = TRUE, sep = "\t")
 
 exp1spec_comm_only <- subset(exp1spec, Condition == "c")
 
@@ -392,7 +398,7 @@ print(exp1_success_align_corr_confint)
 
 # read in data
 
-exp2train <- read.delim("experiment_2_training_scores.txt", header = TRUE, sep = "\t")
+exp2train <- read.delim("output/experiment_2_training_scores.txt", header = TRUE, sep = "\t")
 
 # correct scores according to how many categories were to be learned
 
@@ -412,14 +418,14 @@ cdf = 7
 
 # read in data
 
-exp2spec <- read.delim("experiment_2_specificity.txt", header = TRUE, sep = "\t")
+exp2spec <- read.delim("output/experiment_2_specificity.txt", header = TRUE, sep = "\t")
 
 tmiss <- subset(exp2spec, Condition == "t")
 comm <- subset(exp2spec, Condition == "c")
 
 # average communicative pairs
 # make vector of Generation to add back
-gen_vector = c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+gen_vector = rep(c(1, 2, 3, 4, 5), 8)
 
 comm_avs <- by(comm$Specificity, gl(ceiling(length(comm$Specificity)/2), 2, length(comm$Specificity)), mean)
 comm_avs <- as.list(comm_avs)
@@ -488,10 +494,10 @@ exp2_spec_c_between_ci <- conf_ints_between(m1 = exp2_spec_descriptives[2,6], m2
 
 print(exp2_spec_c_between_ci)
 
-# comparison of final number in communication condition in experiment 2 with individuals from experiment 1
+# comparison of final number in transmission condition in experiment 2 with individuals from experiment 1
 
-exp2_spec_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_spec_descriptives[1,5], m2 = exp2_spec_descriptives[10,6], sd1 = exp1_spec_descriptives[1,6],
-                                            sd2 = exp2_spec_descriptives[10,7], n1 = exp1_spec_descriptives[1,4], n2 = exp2_spec_descriptives[10,5],
+exp2_spec_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_spec_descriptives[1,5], m2 = exp2_spec_descriptives[9,6], sd1 = exp1_spec_descriptives[1,6],
+                                            sd2 = exp2_spec_descriptives[9,7], n1 = exp1_spec_descriptives[1,4], n2 = exp2_spec_descriptives[9,5],
                                             method = "WS")
 
 print(exp2_spec_c_between_expts_ci_1)
@@ -521,14 +527,41 @@ exp2_spec_descriptives["Uplim"] <- c(exp2_spec_t_g1_ci$Uplim, exp2_spec_c_g1_ci$
 
 # Graph
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
-exp1_spec_graph <- ggplot(exp2_spec_descriptives, aes(x=group2, y=mean, group=group1))
-exp1_spec_graph + theme_bw() + geom_point() + geom_line(aes(linetype=group1)) + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25),position=dodge) + scale_x_discrete("\nGeneration") + scale_y_continuous('Specificity\n', limits=c(0,22)) + scale_linetype_manual("Condition",breaks=c("L","C"),values=c(1,2),labels=c("Transmission Alone","Transmission +\nCommunication")) + geom_hline(yintercept=9.95, linetype = 3) + geom_hline(yintercept=5.95, linetype = 4) + annotate("text", x = 0.6, y = 10.6, size = 4, label="C") + annotate("text", x = 0.6, y = 6.6, size = 4, label = "I") + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle)
-ggsave(filename="Exp2Specificity.pdf",width=7.25,height=5.5)
+# average transmission pairs as well for clarity
 
+comm <- subset(exp2spec, Condition == "c")
+tmiss <- subset(exp2spec, Condition == "t")
+
+tmiss_avs <- by(tmiss$Specificity, gl(ceiling(length(tmiss$Specificity)/2), 2, length(tmiss$Specificity)), mean)
+tmiss_avs <- as.list(tmiss_avs)
+tmiss_avs <- data.frame(Specificity = do.call("rbind", tmiss_avs))
+
+exp2spec_plot <- rbind(data.frame(Condition = "t", Generation = gen_vector, Specificity = tmiss_avs$Specificity), comm)
+
+
+# add Chain back to data frame for grouping raw data
+
+chain_vector <- c(rep(1,5), rep(2,5), rep(3,5), rep(4,5), rep(5,5), rep(6,5), rep(7,5), rep(8,5),
+                  rep(1,5), rep(2,5), rep(3,5), rep(4,5), rep(5,5), rep(6,5), rep(7,5), rep(8,5))
+
+exp2spec_plot$Chain <- chain_vector
+
+# for dodging errorbars - to be used here and in all following plots
+dodge <- position_dodge(width=0.25)
+
+exp2_spec_graph <- ggplot(exp2spec_plot, aes(x=Generation, y=Specificity))
+exp2_spec_graph + theme_bw() + geom_line(aes(linetype = Condition, color = Condition, group=interaction(Chain, Condition)), alpha = 0.3, show.legend = FALSE) + 
+  scale_x_discrete("\nGeneration") + scale_y_continuous('Specificity\n', limits=c(0,22)) + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition", breaks = c("t","c"), labels = c("Transmission Alone", "Transmission +\nCommunication")) +
+  geom_hline(yintercept=9.95, linetype = 3) + geom_hline(yintercept=5.95, linetype = 4) + 
+  annotate("text", x = 0.6, y = 10.6, size = 4, label="C") + 
+  annotate("text", x = 0.6, y = 6.6, size = 4, label = "I") +
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.key.width = unit(1, "cm")) +
+  geom_point(data = exp2_spec_descriptives, aes(x = group2, y = mean, color = group1), size = 2) +
+  geom_line(data = exp2_spec_descriptives, aes(x = group2, y = mean, color = group1, group = group1, linetype = group1), size = 1) +
+  geom_errorbar(data = exp2_spec_descriptives, aes(x = group2, group = group1, color = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1, position = dodge, show.legend = FALSE)
+ggsave(filename="Exp2Specificity.pdf",width=7.25,height=5.5)
 
 # Statistical analysis
 
@@ -537,21 +570,33 @@ ggsave(filename="Exp2Specificity.pdf",width=7.25,height=5.5)
 exp2spec$Generation <- ordered(exp2spec$Generation)
 
 exp2_spec_stat <- aov(Specificity ~ Condition * Generation, exp2spec)
-summary(exp2_spec_stat, split=list(Generation = list("Polynomial trend"=1)))
+summary(exp2_spec_stat, split=list(Generation = list("Linear trend"=1)))
 
+# Comparison of generation 5 of Transmission Alone in Experiment 2 with Individuals from Experiment 1
+
+exp2_spec_t_g5 <- subset(exp2spec, Condition == "t")
+exp2_spec_t_g5 <- subset(exp2_spec_t_g5, Generation == 5)
+exp2_spec_t_g5 <- exp2_spec_t_g5[, -2]
+
+exp1_spec_i <- subset(exp1spec, Condition == "i")
+
+spec_comparison <- rbind(exp2_spec_t_g5, exp1_spec_i)
+
+spec_comparison_stat <- t.test(spec_comparison$Specificity ~ spec_comparison$Condition)
+print(spec_comparison_stat)
 
 # Convexity
 
 # read in data
 
-exp2conv <- read.delim("experiment_2_convexity.txt", header = TRUE, sep = "\t")
+exp2conv <- read.delim("output/experiment_2_convexity.txt", header = TRUE, sep = "\t")
 
 tmiss <- subset(exp2conv, Condition == "t")[c(1, 2, 6)]
 comm <- subset(exp2conv, Condition == "c")[c(1, 2, 6)]
 
 # average communicative pairs
 # make vector of Generation to add back
-gen_vector = c(1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5)
+gen_vector = rep(c(1, 2, 3, 4, 5),8)
 
 comm_avs <- by(comm$Corrected, gl(ceiling(length(comm$Corrected)/2), 2, length(comm$Corrected)), mean)
 comm_avs <- as.list(comm_avs)
@@ -620,11 +665,11 @@ exp2_conv_c_between_ci <- conf_ints_between(m1 = exp2_conv_descriptives[2,6], m2
 
 print(exp2_conv_c_between_ci)
 
-# comparison of final number in communication condition in experiment 2 with individuals from experiment 1
+# comparison of final number in transmission condition in experiment 2 with individuals from experiment 1
 
-exp2_conv_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_conv_descriptives[1,5], m2 = exp2_conv_descriptives[10,6], sd1 = exp1_conv_descriptives[1,6],
-                                                    sd2 = exp2_conv_descriptives[10,7], n1 = exp1_conv_descriptives[1,4], n2 = exp2_conv_descriptives[10,5],
-                                                    method = "standard")
+exp2_conv_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_conv_descriptives[1,5], m2 = exp2_conv_descriptives[9,6], sd1 = exp1_conv_descriptives[1,6],
+                                                    sd2 = exp2_conv_descriptives[9,7], n1 = exp1_conv_descriptives[1,4], n2 = exp2_conv_descriptives[9,5],
+                                                    method = "WS")
 
 print(exp2_conv_c_between_expts_ci_1)
 
@@ -653,12 +698,34 @@ exp2_conv_descriptives["Uplim"] <- c(exp2_conv_t_g1_ci$Uplim, exp2_conv_c_g1_ci$
 
 # Graph
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
-exp2_conv_graph <- ggplot(exp2_conv_descriptives, aes(x=group2, y=mean, group=group1))
-exp2_conv_graph + theme_bw() + geom_point() + geom_line(aes(linetype=group1)) + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25),position=dodge) + scale_x_discrete("\nGeneration") + scale_y_continuous('Convexity\n', limits=c(0,1)) + scale_linetype_manual("Condition",breaks=c("L","C"),values=c(1,2),labels=c("Transmission Alone","Transmission +\nCommunication")) + geom_hline(yintercept=0.57, linetype = 3) + geom_hline(yintercept=0.65, linetype = 4) + annotate("text", x = 0.6, y = 0.6, size = 4, label="C") + annotate("text", x = 0.6, y = 0.68, size = 4, label = "I") + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle)
+# average transmission pairs as well for clarity
+
+comm <- subset(exp2conv, Condition == "c")
+tmiss <- subset(exp2conv, Condition == "t")
+
+tmiss_avs <- by(tmiss$Corrected, gl(ceiling(length(tmiss$Corrected)/2), 2, length(tmiss$Corrected)), mean)
+tmiss_avs <- as.list(tmiss_avs)
+tmiss_avs <- data.frame(Corrected = do.call("rbind", tmiss_avs))
+
+exp2conv_plot <- rbind(data.frame(Condition = "t", Generation = gen_vector, Corrected = tmiss_avs$Corrected), comm)
+
+
+# add Chain back to data frame for grouping raw data
+
+exp2conv_plot$Chain <- chain_vector
+
+exp2_conv_graph <- ggplot(exp2conv_plot, aes(x=Generation, y=Corrected))
+exp2_conv_graph + theme_bw() + geom_line(aes(linetype = Condition, color = Condition, group=interaction(Chain, Condition)), alpha = 0.3, show.legend = FALSE) + 
+  scale_x_discrete("\nGeneration") + scale_y_continuous('Convexity\n', limits=c(-0.1,1)) + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition", breaks = c("t","c"), labels=c("Transmission Alone", "Transmission +\nCommunication")) +
+  geom_hline(yintercept=0.57, linetype = 3) + geom_hline(yintercept=0.65, linetype = 4) + 
+  annotate("text", x = 0.6, y = 0.6, size = 4, label="C") + 
+  annotate("text", x = 0.6, y = 0.68, size = 4, label = "I") +
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.key.width = unit(1, "cm")) +
+  geom_point(data = exp2_conv_descriptives, aes(x = group2, y = mean, color = group1), size = 2) +
+  geom_line(data = exp2_conv_descriptives, aes(x = group2, y = mean, color = group1, group = group1, linetype = group1), size = 1) +
+  geom_errorbar(data = exp2_conv_descriptives, aes(x = group2, group = group1, y = mean, color = group1, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1, position = dodge, show.legend = FALSE)
 ggsave(filename="Exp2Convexity.pdf",width=7.25,height=5.5)
 
 
@@ -669,7 +736,20 @@ ggsave(filename="Exp2Convexity.pdf",width=7.25,height=5.5)
 exp2conv$Generation <- ordered(exp2conv$Generation)
 
 exp2_conv_stat <- aov(Corrected ~ Condition * Generation, exp2conv)
-summary(exp2_conv_stat, split=list(Generation = list("Polynomial trend"=1)))
+summary(exp2_conv_stat, split=list(Generation = list("Linear trend"=1)))
+
+# Comparison of generation 5 of Transmission Alone in Experiment 2 with Individuals from Experiment 1
+
+exp2_conv_t_g5 <- subset(exp2conv, Condition == "t")
+exp2_conv_t_g5 <- subset(exp2_conv_t_g5, Generation == 5)
+exp2_conv_t_g5 <- exp2_conv_t_g5[, -2]
+
+exp1_conv_i <- subset(exp1conv, Condition == "i")
+
+conv_comparison <- rbind(exp2_conv_t_g5, exp1_conv_i)
+
+conv_comparison_stat <- t.test(conv_comparison$Corrected ~ conv_comparison$Condition)
+print(conv_comparison_stat)
 
 
 # Alignment
@@ -680,7 +760,7 @@ cdf = 7
 
 # read in data
 
-exp2align <- read.delim("experiment_2_alignment.txt", header = TRUE, sep = "\t")
+exp2align <- read.delim("output/experiment_2_alignment.txt", header = TRUE, sep = "\t")
 
 # reorder factor levels
 
@@ -743,10 +823,10 @@ exp2_align_c_between_ci <- conf_ints_between(m1 = exp2_align_descriptives[2,6], 
 
 print(exp2_align_c_between_ci)
 
-# comparison of final number in communication condition in experiment 2 with individuals from experiment 1
+# comparison of final number in transmission condition in experiment 2 with individuals from experiment 1
 
-exp2_align_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_align_descriptives[1,5], m2 = exp2_align_descriptives[10,6], sd1 = exp1_align_descriptives[1,6],
-                                                    sd2 = exp2_align_descriptives[10,7], n1 = exp1_align_descriptives[1,4], n2 = exp2_align_descriptives[10,5],
+exp2_align_c_between_expts_ci_1 <- conf_ints_between(m1 = exp1_align_descriptives[1,5], m2 = exp2_align_descriptives[9,6], sd1 = exp1_align_descriptives[1,6],
+                                                    sd2 = exp2_align_descriptives[9,7], n1 = exp1_align_descriptives[1,4], n2 = exp2_align_descriptives[9,5],
                                                     method = "WS")
 
 print(exp2_align_c_between_expts_ci_1)
@@ -776,12 +856,23 @@ exp2_align_descriptives["Uplim"] <- c(exp2_align_t_g1_ci$Uplim, exp2_align_c_g1_
 
 # Graph
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
-exp2_align_graph <- ggplot(exp2_align_descriptives, aes(x=group2, y=mean, group=group1))
-exp2_align_graph + theme_bw() + geom_point() + geom_line(aes(linetype=group1)) + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25),position=dodge) + scale_x_discrete("\nGeneration") + scale_y_continuous('Alignment (Adjusted Rand index)\n', limits=c(-0.05,1)) + scale_linetype_manual("Condition",breaks=c("t","c"),values=c(1,2),labels=c("Transmission Alone","Transmission +\nCommunication")) + geom_hline(yintercept=0.24, linetype = 3) + geom_hline(yintercept=0.33, linetype = 4) + annotate("text", x = 0.6, y = 0.27, size = 4, label="C") + annotate("text", x = 0.6, y = 0.36, size = 4, label = "I") + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.position = "none")
+# add Chain to data frame for grouping raw data
+
+exp2align_plot <- exp2align
+exp2align_plot$Chain <- chain_vector
+
+exp2_align_graph <- ggplot(exp2align_plot, aes(x=Generation, y=AdjustedRandIndex))
+exp2_align_graph + theme_bw() + geom_line(aes(linetype = Condition, color = Condition, group=interaction(Chain, Condition)), alpha = 0.3) + 
+  scale_x_discrete("\nGeneration") + scale_y_continuous('Alignment (Adjusted Rand index)\n', limits=c(-0.05,1)) + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition", breaks=c("t","c",labels=c("Transmission Alone", "Transmission +\nCommunication"))) +
+  geom_hline(yintercept=0.24, linetype = 3) + geom_hline(yintercept=0.33, linetype = 4) + 
+  annotate("text", x = 0.6, y = 0.27, size = 4, label="C") + 
+  annotate("text", x = 0.6, y = 0.36, size = 4, label = "I") + 
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.position = "none") +
+  geom_point(data = exp2_align_descriptives, aes(x = group2, y = mean, color = group1), size = 2) +
+  geom_line(data = exp2_align_descriptives, aes(x = group2, y = mean, group = group1, color = group1, linetype = group1), size = 1) +
+  geom_errorbar(data = exp2_align_descriptives, aes(x = group2, group = group1, color = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1, position = dodge)
 ggsave(filename="Exp2Alignment.pdf",width=7.25,height=5.5)
 
 
@@ -792,8 +883,20 @@ ggsave(filename="Exp2Alignment.pdf",width=7.25,height=5.5)
 exp2align$Generation <- ordered(exp2align$Generation)
 
 exp2_align_stat <- aov(AdjustedRandIndex ~ Condition * Generation, exp2align)
-summary(exp2_align_stat, split=list(Generation = list("Polynomial trend"=1)))
+summary(exp2_align_stat, split=list(Generation = list("Linear trend"=1)))
 
+# Comparison of generation 5 of Transmission Alone in Experiment 2 with Individuals from Experiment 1
+
+exp2_align_t_g5 <- subset(exp2align, Condition == "t")
+exp2_align_t_g5 <- subset(exp2_align_t_g5, Generation == 5)
+exp2_align_t_g5 <- exp2_align_t_g5[, -2]
+
+exp1_align_i <- subset(exp1align, Condition == "i")
+
+align_comparison <- rbind(exp2_align_t_g5, exp1_align_i)
+
+align_comparison_stat <- t.test(align_comparison$AdjustedRandIndex ~ align_comparison$Condition)
+print(align_comparison_stat)
 
 
 
@@ -803,7 +906,7 @@ summary(exp2_align_stat, split=list(Generation = list("Polynomial trend"=1)))
 
 # read in data
 
-exp2converge <- read.delim("experiment_2_convergence.txt", header = TRUE, sep = "\t")
+exp2converge <- read.delim("output/experiment_2_convergence.txt", header = TRUE, sep = "\t")
 
 print(exp2converge)
 
@@ -811,12 +914,17 @@ print(exp2converge)
 
 exp2converge$Condition = factor(exp2converge$Condition,levels(exp2converge$Condition)[c(2,1)])
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
 exp2_converge_graph <- ggplot(exp2converge, aes(x=Generation, y=Convergence, group=Condition))
-exp2_converge_graph + theme_bw() + geom_point() + geom_line(aes(linetype=Condition)) + geom_errorbar(aes(ymin=LowLim, ymax=UpLim, width=0.25),position=dodge) + scale_x_continuous("\nGeneration") + scale_y_continuous('', limits=c(-0.05,1)) + scale_linetype_manual("Condition",breaks=c("t","c"),values=c(1,2),labels=c("Transmission Alone","Transmission +\nCommunication")) + geom_hline(yintercept=0.18, linetype = 3) + geom_hline(yintercept=0.36, linetype = 4) + annotate("text", x = 0.6, y = 0.21, size = 4, label="C") + annotate("text", x = 0.6, y = 0.39, size = 4, label = "I") + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.position = c(0.8, 0.8), legend.title = element_text(size=14, face = "bold"), legend.text = element_text(size=12))
+exp2_converge_graph + theme_bw() + geom_point(aes(color = Condition), size = 2) + 
+  geom_line(aes(linetype=Condition, color=Condition), size = 1) + 
+  geom_errorbar(aes(color = Condition, ymin=LowLim, ymax=UpLim, width=0.25),position=dodge, size = 1, show.legend = FALSE) + 
+  scale_x_continuous("\nGeneration") + scale_y_continuous('', limits=c(-0.05,1)) + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone", "Transmission +\nCommunication")) +
+  geom_hline(yintercept=0.18, linetype = 3) + geom_hline(yintercept=0.36, linetype = 4) + 
+  annotate("text", x = 0.6, y = 0.21, size = 4, label="C") + 
+  annotate("text", x = 0.6, y = 0.39, size = 4, label = "I") + 
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.position = c(0.8, 0.8), legend.title = element_text(size=14, face = "bold"), legend.text = element_text(size=12), legend.key.width = unit(1, "cm"))
 ggsave(filename="Exp2Convergence.pdf",width=7.25,height=5.5)
 
 
@@ -824,9 +932,9 @@ ggsave(filename="Exp2Convergence.pdf",width=7.25,height=5.5)
 
 # read in data
 
-exp2success <- read.delim("experiment_2_success_last_2.txt", header = TRUE, sep = "\t")
+exp2success <- read.delim("output/experiment_2_success_last_2.txt", header = TRUE, sep = "\t")
 
-exp2simsuccess <- read.delim("experiment_2_sim_success.txt", header = TRUE, sep = "\t")
+exp2simsuccess <- read.delim("output/experiment_2_sim_success.txt", header = TRUE, sep = "\t")
 
 # combine these files
 
@@ -920,9 +1028,9 @@ exp2_success_descriptives["Uplim"] <- c(exp2_success_t_g1_ci$Uplim, exp2_success
                                       exp2_success_t_g5_ci$Uplim, exp2_success_c_g5_ci$Uplim)
 
 # add column designating these as Overall scores
-exp2_success_descriptives["group3"] <- "Overall"
+exp2_success_descriptives["Measure"] <- "Overall"
 
-# summarise corrected scores
+# summarise per-category scores
 
 exp2_success_corr_descriptives <- describeBy(exp2success$SuccessCorr, list(exp2success$Condition, exp2success$Generation), mat = TRUE)
 
@@ -930,7 +1038,7 @@ exp2_success_corr_descriptives <- describeBy(exp2success$SuccessCorr, list(exp2s
 
 exp2_success_corr_descriptives$group1 = factor(exp2_success_corr_descriptives$group1,levels(exp2_success_corr_descriptives$group1)[c(2,1)])
 
-# calculate confidence intervals for corrected scores
+# calculate confidence intervals for per-category scores
 
 exp2_success_corr_t_g1_ci <- conf_ints_within(exp2_success_corr_descriptives[1, 6], idf, exp2_success_corr_descriptives[1, 16])
 exp2_success_corr_c_g1_ci <- conf_ints_within(exp2_success_corr_descriptives[2, 6], cdf, exp2_success_corr_descriptives[2, 16])
@@ -957,24 +1065,48 @@ exp2_success_corr_descriptives["Uplim"] <- c(exp2_success_corr_t_g1_ci$Uplim, ex
                                         exp2_success_corr_t_g5_ci$Uplim, exp2_success_corr_c_g5_ci$Uplim)
 
 # add column designating these as per-category scores
-exp2_success_corr_descriptives["group3"] <- "Per-category"
+exp2_success_corr_descriptives["Measure"] <- "Per-category"
 
-# make combined data frame with corrected and raw scores
+# make combined data frame with per-category and overall scores
 
 exp2_success_descriptives <- rbind(exp2_success_descriptives, exp2_success_corr_descriptives)
 
 # Graph
 
+# restructure raw data to long format
+
+exp2success_raw <- subset(exp2success, select = c(Condition, Generation, SuccessRaw))
+exp2success_corr <- subset(exp2success, select = c(Condition, Generation, SuccessCorr))
+
+names(exp2success_raw)[3] <- "Success"
+names(exp2success_corr)[3] <- "Success"
+
+exp2success_raw$Measure <- "Overall"
+exp2success_corr$Measure <- "Per-category"
+
+exp2success_plot <- rbind(exp2success_raw, exp2success_corr)
+
+# add Chain back to data frame - different ordering in this data frame
+
+chain_vector_success <- rep(c(1,2,3,4,5,6,7,8),20)
+
+exp2success_plot$Chain <- chain_vector_success
+
 # reference lines for each facet
 
-reflines <- data.frame(group3 = c("Overall", "Per-category"), Z = c(293.75, 34.96116493))
+reflines <- data.frame(Measure = c("Overall", "Per-category"), Z = c(293.75, 34.96116493))
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
-exp2_success_graph <- ggplot(exp2_success_descriptives, aes(x=group2, y=mean, group=group1))
-exp2_success_graph + theme_bw() + geom_point() + geom_line(aes(linetype=group1)) + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25),position=dodge) + scale_x_discrete("\nGeneration") + scale_y_continuous('Communicative success\n') + scale_linetype_manual("Condition",breaks=c("t","c"),values=c(1,2),labels=c("Transmission Alone","Transmission + Communication")) + facet_grid(group3~., scales="free") + geom_hline(data = reflines, linetype = 3, aes(yintercept = Z)) + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle)
+exp2_success_graph <- ggplot(exp2success_plot, aes(x=Generation, y=Success))
+exp2_success_graph + theme_bw() + geom_line(aes(linetype = Condition, color = Condition, group=interaction(Chain, Condition)), alpha = 0.3, show.legend = FALSE) + 
+  scale_x_discrete("\nGeneration") + scale_y_continuous('Communicative success\n') + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone", "Transmission +\nCommunication")) +
+  geom_hline(data = reflines, linetype = 3, aes(yintercept = Z)) +
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.key.width = unit(1, "cm")) +
+  geom_point(data = exp2_success_descriptives, aes(x = group2, y = mean, color = group1), size = 2) +
+  geom_line(data = exp2_success_descriptives, aes(x = group2, y = mean, group = group1, color = group1, linetype = group1), size = 1) +
+  geom_errorbar(data = exp2_success_descriptives, aes(x = group2, group = group1, color = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1, position = dodge, show.legend = FALSE) +
+  facet_grid(Measure~., scales="free")
 ggsave(filename="Exp2Success.pdf",width=7.25,height=5.5)
 
 
@@ -985,7 +1117,7 @@ ggsave(filename="Exp2Success.pdf",width=7.25,height=5.5)
 exp2success$Generation <- ordered(exp2success$Generation)
 
 exp2_success_stat <- aov(SuccessRaw ~ Condition * Generation, exp2success)
-summary(exp2_success_stat, split=list(Generation = list("Polynomial trend"=1)))
+summary(exp2_success_stat, split=list(Generation = list("Linear trend"=1)))
 
 
 # Learnability
@@ -997,7 +1129,7 @@ cdf = 7
 
 # read in data
 
-exp2learn <- read.delim("experiment_2_learnability.txt", header = TRUE, sep = "\t")
+exp2learn <- read.delim("output/experiment_2_learnability.txt", header = TRUE, sep = "\t")
 
 tmiss <- subset(exp2learn, Condition == "t")
 comm <- subset(exp2learn, Condition == "c")
@@ -1006,7 +1138,7 @@ comm <- subset(exp2learn, Condition == "c")
 # make vector of Generation to add back - this time no generation 1 (learnability undefined), 
 # order also different because of how the Python code calculates this
 
-gen_vector = c(2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5)
+gen_vector = c(rep(2,8), rep(3,8), rep(4,8), rep(5,8))
 
 comm_avs <- by(comm$Learnability, gl(ceiling(length(comm$Learnability)/2), 2, length(comm$Learnability)), mean)
 comm_avs <- as.list(comm_avs)
@@ -1088,21 +1220,41 @@ exp2_learn_descriptives["Uplim"] <- c(exp2_learn_t_g2_ci$Uplim, exp2_learn_c_g2_
 
 # Graph
 
-xaxistitle <- element_text(vjust=-0.5,size=14,face="bold")
-yaxistitle <- element_text(vjust=0.2,size=14,face="bold")
-axistext <- element_text(size=12)
-dodge <- position_dodge(width=0.25)
-exp2_learn_graph <- ggplot(exp2_learn_descriptives, aes(x=group2, y=mean, group=group1))
-exp2_learn_graph + theme_bw() + geom_point() + geom_line(aes(linetype=group1)) + geom_errorbar(aes(ymin=Lowlim, ymax=Uplim, width=0.25),position=dodge) + scale_x_discrete("\nGeneration") + scale_y_continuous('Category system learnability\n',limits=c(0,1)) + scale_linetype_manual("Condition",breaks=c("t","c"),values=c(1,2),labels=c("Transmission Alone","Transmission + Communication")) + theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle)
-ggsave(filename="Exp2Learnability.pdf",width=7.25,height=5.5)
-
-
-# Statistical analysis
-
 # Generation as ordered factor
 
 exp2learn$Generation <- ordered(exp2learn$Generation)
 
+# average transmission pairs as well for clarity
+
+comm <- subset(exp2learn, Condition == "c")
+tmiss <- subset(exp2learn, Condition == "t")
+
+tmiss_avs <- by(tmiss$Learnability, gl(ceiling(length(tmiss$Learnability)/2), 2, length(tmiss$Learnability)), mean)
+tmiss_avs <- as.list(tmiss_avs)
+tmiss_avs <- data.frame(Learnability = do.call("rbind", tmiss_avs))
+
+exp2learn_plot <- rbind(data.frame(Condition = "t", Generation = gen_vector, Learnability = tmiss_avs$Learnability), comm)
+
+
+# add Chain back to data frame for grouping raw data
+
+chain_vector_learn <- rep(c(1,2,3,4,5,6,7,8),8)
+
+exp2learn_plot$Chain <- chain_vector_learn
+
+exp2_learn_graph <- ggplot(exp2learn_plot, aes(x=Generation, y=Learnability))
+exp2_learn_graph + theme_bw() + geom_line(aes(linetype = Condition, color = Condition, group=interaction(Chain, Condition)), alpha = 0.3, show.legend = FALSE) + 
+  scale_x_discrete("\nGeneration") + scale_y_continuous('Category system learnability\n', limits=c(-0.05,1)) + 
+  scale_linetype_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) + 
+  scale_color_discrete("Condition",breaks=c("t","c"),labels=c("Transmission Alone","Transmission +\nCommunication")) +
+  theme(axis.text=axistext, axis.title.x = xaxistitle, axis.title.y=yaxistitle, legend.key.width = unit(1, "cm")) +
+  geom_point(data = exp2_learn_descriptives, aes(x = group2, y = mean, color = group1), size = 2) +
+  geom_line(data = exp2_learn_descriptives, aes(x = group2, y = mean, group = group1, color = group1, linetype = group1), size = 1) +
+  geom_errorbar(data = exp2_learn_descriptives, aes(x = group2, group = group1, color = group1, y = mean, ymin = Lowlim, ymax = Uplim), width = 0.25, size = 1, position = dodge, show.legend = FALSE)
+ggsave(filename="Exp2Learnability.pdf",width=7.25,height=5.5)
+
+# Statistical analysis
+
 exp2_learn_stat <- aov(Learnability ~ Condition * Generation, exp2learn)
-summary(exp2_learn_stat, split=list(Generation = list("Polynomial trend"=1)))
+summary(exp2_learn_stat, split=list(Generation = list("Linear trend"=1)))
 
